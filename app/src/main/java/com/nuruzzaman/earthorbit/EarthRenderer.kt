@@ -39,6 +39,20 @@ private class Textures(val color: IntArray, val aux: IntArray, val w: Int, val h
 /** A camera looking at Earth. Each vector is given in the ecliptic frame (x, y in the orbit plane, z = north). */
 private class Basis(val r: DoubleArray, val u: DoubleArray, val c: DoubleArray)
 
+/**
+ * Extra drawing choices.
+ * drawTime: add the time of day to the date text.
+ * spin: fixed Earth rotation in radians (used by the time-lapse); null means the real rotation for the time.
+ * minDp: the widget's smaller side in dp, used to hide text and labels that would be too small to read.
+ * clockReservePx: width kept free on the right for a live clock drawn by the home screen.
+ */
+class RenderOptions(
+    val drawTime: Boolean = false,
+    val spin: Double? = null,
+    val minDp: Float = 150f,
+    val clockReservePx: Float = 0f
+)
+
 object EarthRenderer {
     private const val TAU = 2 * PI
     private val SIN_E = OrbitMath.SIN_E
@@ -232,8 +246,11 @@ object EarthRenderer {
 
     private val filter = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
 
-    private fun drawEarth(canvas: Canvas, ctx: Context, cx: Float, cy: Float, radius: Float, view: Basis, L: Double, nowMs: Long) {
-        val sprite = earthSprite(ctx, radius, view, sunVec(L), spinAngle(L, nowMs))
+    private fun drawEarth(
+        canvas: Canvas, ctx: Context, cx: Float, cy: Float, radius: Float, view: Basis, L: Double, nowMs: Long,
+        spin: Double? = null
+    ) {
+        val sprite = earthSprite(ctx, radius, view, sunVec(L), spin ?: spinAngle(L, nowMs))
         canvas.drawBitmap(sprite, cx - sprite.width / 2f, cy - sprite.height / 2f, filter)
         sprite.recycle()
     }
@@ -271,7 +288,7 @@ object EarthRenderer {
     /** The orbit ring, month marks, trailing arc, Sun and a polar-view Earth. */
     private fun drawOrbitScene(
         canvas: Canvas, ctx: Context, cx: Float, cy: Float, size: Float, st: OrbitMath.State,
-        nowMs: Long, look: Look, monthLabels: Boolean
+        nowMs: Long, look: Look, monthLabels: Boolean, spin: Double? = null
     ) {
         val orbitR = size * 0.335f
         val earthR = size * 0.098f
@@ -346,7 +363,7 @@ object EarthRenderer {
 
         val ex = (cx + orbitR * st.r * cos(st.L)).toFloat()
         val ey = (cy - orbitR * st.r * sin(st.L)).toFloat()
-        drawEarth(canvas, ctx, ex, ey, earthR, POLAR, st.L, nowMs)
+        drawEarth(canvas, ctx, ex, ey, earthR, POLAR, st.L, nowMs, spin)
     }
 
     // ---------------------------------------------------------------- background and mask
@@ -396,9 +413,20 @@ object EarthRenderer {
         }
     }
 
+
     // ---------------------------------------------------------------- public entry
 
-    fun render(ctx: Context, shape: Shape, look: Look, showInfo: Boolean, wPx: Int, hPx: Int, nowMs: Long): Bitmap {
+    /** Whether the date text is drawn. Tiny widgets drop it so Earth stays readable. */
+    fun infoShown(shape: Shape, showInfo: Boolean, w: Float, h: Float, minDp: Float): Boolean = when (shape) {
+        Shape.ORBIT, Shape.GLOBE -> showInfo && minDp >= 100f
+        Shape.WIDE -> showInfo
+        Shape.STRIP -> showInfo && w / h > 1.6f
+    }
+
+    fun render(
+        ctx: Context, shape: Shape, look: Look, showInfo: Boolean, wPx: Int, hPx: Int, nowMs: Long,
+        opt: RenderOptions = RenderOptions()
+    ): Bitmap {
         val side = min(wPx, hPx)
         val w = if (shape.squareBitmap) side else wPx
         val h = if (shape.squareBitmap) side else hPx
@@ -418,29 +446,36 @@ object EarthRenderer {
             Shape.WIDE -> fh * 0.2f
             Shape.STRIP -> fh / 2f
         }
+        val info = infoShown(shape, showInfo, fw, fh, opt.minDp)
+        val spin = opt.spin
 
         drawBackground(canvas, w, h, look, shape.ordinal * 101L + 7)
 
         val date = SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(Date(nowMs))
+        val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(nowMs))
+        val stamp = if (opt.drawTime) "$date · $time" else date
         val dist = String.format(Locale.US, "%.1fM km", st.distanceMkm)
         val seasonName = arrayOf("Spring", "Summer", "Autumn", "Winter")[st.season]
         val dayOfYear = Calendar.getInstance().apply { timeInMillis = nowMs }.get(Calendar.DAY_OF_YEAR)
 
         when (shape) {
             Shape.ORBIT -> {
-                drawOrbitScene(canvas, ctx, fw / 2, fh / 2, fw, st, nowMs, look, monthLabels = true)
-                if (showInfo) {
+                drawOrbitScene(canvas, ctx, fw / 2, fh / 2, fw, st, nowMs, look, opt.minDp >= 170f, spin)
+                if (info) {
                     val p1 = textPaint(fw * 0.062f, true, ink, transparent)
-                    canvas.drawText(date, fw * 0.07f, fw * 0.06f + p1.textSize * 0.8f, p1)
+                    fit(p1, stamp, fw * 0.86f)
+                    canvas.drawText(stamp, fw * 0.07f, fw * 0.06f + p1.textSize * 0.8f, p1)
                     val p2 = textPaint(fw * 0.044f, false, muted, transparent)
-                    canvas.drawText("$dist from Sun", fw * 0.07f, fw * 0.95f, p2)
+                    val line = "$dist from Sun"
+                    fit(p2, line, fw * 0.6f)
+                    canvas.drawText(line, fw * 0.07f, fw * 0.95f, p2)
                 }
             }
 
             Shape.GLOBE -> {
                 val view = globeView(st.L)
-                val earthR = if (showInfo) fw * 0.31f else fw * 0.40f
-                val cy = if (showInfo) fh * 0.44f else fh * 0.5f
+                val earthR = if (info) fw * 0.28f else fw * 0.40f
+                val cy = if (info) fh * 0.40f else fh * 0.5f
                 // faint warm glow on the side the Sun is on
                 val sun = sunVec(st.L)
                 var gx = dot(sun, view.r)
@@ -456,53 +491,66 @@ object EarthRenderer {
                     )
                 }
                 canvas.drawCircle(glowCx, glowCy, earthR * 2.2f, glow)
-                drawEarth(canvas, ctx, fw / 2, cy, earthR, view, st.L, nowMs)
-                if (showInfo) {
-                    val p1 = textPaint(fw * 0.075f, true, ink, transparent).apply { textAlign = Paint.Align.CENTER }
-                    canvas.drawText(date, fw / 2, fh * 0.855f, p1)
-                    val p2 = textPaint(fw * 0.052f, false, muted, transparent).apply { textAlign = Paint.Align.CENTER }
-                    canvas.drawText(dist, fw / 2, fh * 0.94f, p2)
+                drawEarth(canvas, ctx, fw / 2, cy, earthR, view, st.L, nowMs, spin)
+                if (info) {
+                    val p1 = textPaint(fw * 0.07f, true, ink, transparent).apply { textAlign = Paint.Align.CENTER }
+                    fit(p1, stamp, fw * 0.74f)
+                    canvas.drawText(stamp, fw / 2, fh * 0.80f, p1)
+                    val p2 = textPaint(fw * 0.05f, false, muted, transparent).apply { textAlign = Paint.Align.CENTER }
+                    fit(p2, dist, fw * 0.5f)
+                    canvas.drawText(dist, fw / 2, fh * 0.875f, p2)
                 }
             }
 
             Shape.WIDE -> {
-                if (showInfo) {
-                    drawOrbitScene(canvas, ctx, fh / 2, fh / 2, fh, st, nowMs, look, monthLabels = false)
+                if (info) {
+                    drawOrbitScene(canvas, ctx, fh / 2, fh / 2, fh, st, nowMs, look, false, spin)
                     val x0 = fh * 1.02f
-                    val avail = fw - x0 - fh * 0.06f
-                    val lines = listOf(
-                        "$seasonName · day $dayOfYear" to 0.47f,
-                        "$dist from Sun" to 0.65f,
-                        String.format(Locale.US, "%.1f km/s", st.speedKms) to 0.82f
-                    )
-                    val p1 = textPaint(fh * 0.17f, true, ink, transparent)
-                    fit(p1, date, avail)
-                    canvas.drawText(date, x0, fh * 0.30f, p1)
-                    for ((text, base) in lines) {
-                        val p = textPaint(fh * 0.095f, false, muted, transparent)
-                        fit(p, text, avail)
-                        canvas.drawText(text, x0, fh * base, p)
+                    val avail = fw - x0 - fh * 0.06f - opt.clockReservePx
+                    if (fw / fh > 2.3f) {
+                        // short and wide: date, then one line of numbers
+                        val p1 = textPaint(fh * 0.28f, true, ink, transparent)
+                        fit(p1, stamp, avail)
+                        canvas.drawText(stamp, x0, fh * 0.50f, p1)
+                        val line = "$dist · $seasonName"
+                        val p2 = textPaint(fh * 0.17f, false, muted, transparent)
+                        fit(p2, line, avail)
+                        canvas.drawText(line, x0, fh * 0.80f, p2)
+                    } else {
+                        val p1 = textPaint(fh * 0.17f, true, ink, transparent)
+                        fit(p1, stamp, avail)
+                        canvas.drawText(stamp, x0, fh * 0.30f, p1)
+                        val lines = listOf(
+                            "$seasonName · day $dayOfYear" to 0.47f,
+                            "$dist from Sun" to 0.65f,
+                            String.format(Locale.US, "%.1f km/s", st.speedKms) to 0.82f
+                        )
+                        for ((text, base) in lines) {
+                            val p = textPaint(fh * 0.095f, false, muted, transparent)
+                            fit(p, text, avail)
+                            canvas.drawText(text, x0, fh * base, p)
+                        }
                     }
                 } else {
-                    drawOrbitScene(canvas, ctx, fw / 2, fh / 2, min(fw, fh), st, nowMs, look, monthLabels = false)
+                    drawOrbitScene(canvas, ctx, fw / 2, fh / 2, min(fw, fh), st, nowMs, look, false, spin)
                 }
             }
 
             Shape.STRIP -> {
                 val view = globeView(st.L)
-                if (showInfo) {
-                    drawEarth(canvas, ctx, fh * 0.55f, fh / 2, fh * 0.40f, view, st.L, nowMs)
+                if (info) {
+                    drawEarth(canvas, ctx, fh * 0.55f, fh / 2, fh * 0.40f, view, st.L, nowMs, spin)
                     val x0 = fh * 1.12f
-                    val avail = fw - x0 - fh * 0.3f
+                    val avail = fw - x0 - fh * 0.3f - opt.clockReservePx
                     val p1 = textPaint(fh * 0.30f, true, ink, transparent)
-                    fit(p1, date, avail)
-                    canvas.drawText(date, x0, fh * 0.50f, p1)
+                    fit(p1, stamp, avail)
+                    canvas.drawText(stamp, x0, fh * 0.50f, p1)
                     val line = "$dist · $seasonName"
                     val p2 = textPaint(fh * 0.19f, false, muted, transparent)
                     fit(p2, line, avail)
                     canvas.drawText(line, x0, fh * 0.80f, p2)
                 } else {
-                    drawEarth(canvas, ctx, fw / 2, fh / 2, fh * 0.42f, view, st.L, nowMs)
+                    drawEarth(canvas, ctx, fw / 2, fh / 2, fh * 0.42f, view, st.L, nowMs, spin)
                 }
             }
         }

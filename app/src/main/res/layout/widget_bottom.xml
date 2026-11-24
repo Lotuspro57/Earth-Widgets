@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Still widget for the round Globe. The live clock sits at the bottom centre. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/widget_desc"
+        android:scaleType="fitCenter" />
+
+    <TextClock
+        android:id="@+id/clock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="6dp"
+        android:format12Hour="h:mm a"
+        android:format24Hour="HH:mm"
+        android:includeFontPadding="false"
+        android:shadowColor="#B0000000"
+        android:shadowDy="1"
+        android:shadowRadius="3"
+        android:textColor="#FFFFFFFF"
+        android:textSize="12sp" />
+</FrameLayout>

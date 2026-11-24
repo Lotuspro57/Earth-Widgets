@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Time-lapse widget. The home screen flips through 12 pictures by itself, so it costs no battery. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ViewFlipper
+        android:id="@+id/flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:autoStart="true"
+        android:contentDescription="@string/widget_desc"
+        android:flipInterval="1000"
+        android:inAnimation="@android:anim/fade_in">
+        <ImageView android:id="@+id/f0" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f1" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f2" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f3" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f4" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f5" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f6" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f7" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f8" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f9" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f10" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f11" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+    </ViewFlipper>
+</FrameLayout>

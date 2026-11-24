@@ -3,14 +3,24 @@
 Home-screen widgets that show Earth on its real orbit around the Sun, placed by today's date.
 Four shapes, and each widget can be **Solid**, **Glass** or **Transparent**.
 
-| Shape | Size | What it shows |
+| Shape | Default size | What it shows |
 |---|---|---|
-| Orbit | 3x3, square | Whole orbit, month ring, Earth, Sun, date and distance |
-| Globe | 2x2, round | Large Earth with real day and night, date and distance |
-| Wide | 4x2 | Orbit on the left, date, season, distance and speed on the right |
-| Strip | 4x1 | Small Earth, date, distance and season |
+| Orbit | 2x2 | Whole orbit with Earth and Sun. Month ring when the widget is large |
+| Globe | 1x1, round | Earth with real day and night. Date text appears when resized larger |
+| Wide | 3x1 | Orbit on the left, date and numbers on the right |
+| Strip | 2x1 | Small Earth, date and distance |
 
-Looks: Solid (starry space), Glass (see-through dark tint with a soft edge), Transparent (no background, only Earth, Sun and text with a shadow). A switch hides the text.
+All shapes can be resized. Very small widgets hide the text so Earth stays clear.
+
+Looks: Solid (starry space), Glass (see-through dark tint), Transparent (no background, only Earth, Sun and text with a shadow).
+
+Per widget settings: look, date (today live, or any date you pick), show or hide details, and a time-lapse animation.
+
+Timestamp: a live clock (HH:mm) sits in the corner of a live widget. Time-lapse frames of the Globe and Strip draw the time of day in the text.
+
+Time-lapse: the widget holds 12 pictures and the home screen flips through them about once a second. Orbit and Wide loop through one year (Earth circles the Sun). Globe and Strip loop through one day (Earth spins). Some launchers do not auto-flip widget pictures. If yours does not, use the in-app viewer, which always animates.
+
+In the app: a live Earth with the full timestamp (with seconds), Pick date (day, month, year), step buttons for -1/+1 year, month and day, Play with 1 day, 1 week or 1 month per second, and Now.
 
 ## Build and install
 
