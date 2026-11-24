@@ -19,19 +19,21 @@ import kotlin.math.sqrt
 object WidgetUpdater {
     const val ACTION_REFRESH = "com.nuruzzaman.earthorbit.REFRESH"
 
-    /** Pictures in one time-lapse loop. */
-    private const val FRAMES = 12
-    private const val HOUR_MS = 3_600_000L
-    private const val MONTH_MS = 2_629_800_000L
+    /** Pictures in one time-lapse loop. The home screen shows them about 8 per second. */
+    private const val FRAMES = 30
+    private const val DAY_MS = 86_400_000L
+    private const val YEAR_MS = 31_557_600_000L
 
-    /** Largest side of a still picture, and pixel budgets, to stay within the home screen's memory limit for widget images. */
+    /** Largest side of a still picture and its pixel budget, to stay within the home screen's memory limit for widget images. */
     private const val MAX_SIDE_PX = 800f
     private const val STILL_PIXELS = 640f * 640f
-    private const val FRAME_PIXELS = 120_000f
 
     private val FRAME_IDS = intArrayOf(
         R.id.f0, R.id.f1, R.id.f2, R.id.f3, R.id.f4, R.id.f5,
-        R.id.f6, R.id.f7, R.id.f8, R.id.f9, R.id.f10, R.id.f11
+        R.id.f6, R.id.f7, R.id.f8, R.id.f9, R.id.f10, R.id.f11,
+        R.id.f12, R.id.f13, R.id.f14, R.id.f15, R.id.f16, R.id.f17,
+        R.id.f18, R.id.f19, R.id.f20, R.id.f21, R.id.f22, R.id.f23,
+        R.id.f24, R.id.f25, R.id.f26, R.id.f27, R.id.f28, R.id.f29
     )
 
     private class Size(val w: Int, val h: Int, val wDp: Float, val hDp: Float) {
@@ -50,10 +52,10 @@ object WidgetUpdater {
             // A loop of 12 pictures that the home screen flips through by itself.
             rv = RemoteViews(ctx.packageName, R.layout.widget_flip)
             for (i in 0 until FRAMES) {
-                val t = if (shape.loopsOverDay) base + i * 2 * HOUR_MS else base + i * MONTH_MS
+                val t = if (shape.loopsOverDay) base + i * (DAY_MS / FRAMES) else base + i * (YEAR_MS / FRAMES)
                 val opt = RenderOptions(
                     drawTime = shape.loopsOverDay,
-                    spin = if (shape.loopsOverDay) null else i * 1.1,
+                    spin = if (shape.loopsOverDay) null else i * 0.25,
                     minDp = size.minDp
                 )
                 val bmp = EarthRenderer.render(ctx, shape, s.look, s.showInfo, size.w, size.h, t, opt)
@@ -83,6 +85,16 @@ object WidgetUpdater {
         mgr.updateAppWidget(id, rv)
     }
 
+    /**
+     * Pixels per picture in a time-lapse. Android lets a widget carry about 1.5 screens' worth of picture memory,
+     * so the budget follows this phone's screen and uses 60% of that to stay safe.
+     */
+    private fun framePixels(ctx: Context): Float {
+        val dm = ctx.resources.displayMetrics
+        val maxBytes = dm.widthPixels.toFloat() * dm.heightPixels.toFloat() * 4f * 1.5f * 0.6f
+        return (maxBytes / (4f * FRAMES)).coerceIn(20_000f, 160_000f)
+    }
+
     private fun size(ctx: Context, mgr: AppWidgetManager, id: Int, shape: Shape, frames: Boolean): Size {
         val o = mgr.getAppWidgetOptions(id)
         val portrait = ctx.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE
@@ -99,7 +111,7 @@ object WidgetUpdater {
         val density = ctx.resources.displayMetrics.density
         val w = wDp * density
         val h = hDp * density
-        val budget = if (frames) FRAME_PIXELS else STILL_PIXELS
+        val budget = if (frames) framePixels(ctx) else STILL_PIXELS
         val scale = minOf(1f, MAX_SIDE_PX / max(w, h), sqrt(budget / (w * h)))
         return Size(max(1, (w * scale).toInt()), max(1, (h * scale).toInt()), wDp, hDp)
     }

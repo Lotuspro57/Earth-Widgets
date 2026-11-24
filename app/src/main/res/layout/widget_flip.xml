@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Time-lapse widget. The home screen flips through 12 pictures by itself, so it costs no battery. -->
+<!-- Time-lapse widget. The home screen flips through 30 pictures by itself, about 8 per second. No fade, so there is no flicker. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
     android:layout_width="match_parent"
@@ -11,8 +11,7 @@
         android:layout_height="match_parent"
         android:autoStart="true"
         android:contentDescription="@string/widget_desc"
-        android:flipInterval="1000"
-        android:inAnimation="@android:anim/fade_in">
+        android:flipInterval="120">
         <ImageView android:id="@+id/f0" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
         <ImageView android:id="@+id/f1" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
         <ImageView android:id="@+id/f2" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
@@ -25,5 +24,23 @@
         <ImageView android:id="@+id/f9" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
         <ImageView android:id="@+id/f10" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
         <ImageView android:id="@+id/f11" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f12" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f13" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f14" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f15" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f16" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f17" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f18" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f19" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f20" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f21" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f22" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f23" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f24" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f25" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f26" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f27" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f28" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
+        <ImageView android:id="@+id/f29" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitCenter" />
     </ViewFlipper>
 </FrameLayout>

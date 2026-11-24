@@ -46,7 +46,7 @@ class EarthView(context: Context) : View(context) {
             spin += dt * 0.35
         }
 
-        val rs = min(side, 600)
+        val rs = min(side, 480)
         val density = resources.displayMetrics.density
         val bmp = EarthRenderer.render(
             context, Shape.ORBIT, Look.SOLID, true, rs, rs, simMs,
