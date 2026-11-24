@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strip: one row, a small Earth with the date and distance. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.nuruzzaman.earthorbit.ConfigActivity"
+    android:description="@string/widget_strip"
+    android:initialLayout="@layout/widget_image"
+    android:minWidth="250dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="40dp"
+    android:previewImage="@drawable/preview_strip"
+    android:resizeMode="horizontal"
+    android:targetCellWidth="4"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />

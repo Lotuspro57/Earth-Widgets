@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Earth Orbit</string>
+    <string name="widget_orbit">Earth Orbit · Orbit</string>
+    <string name="widget_globe">Earth Orbit · Globe</string>
+    <string name="widget_wide">Earth Orbit · Wide</string>
+    <string name="widget_strip">Earth Orbit · Strip</string>
+    <string name="widget_desc">Earth orbiting the Sun. Tap to refresh.</string>
+</resources>
